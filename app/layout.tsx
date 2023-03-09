@@ -5,6 +5,7 @@ import SupabaseListener from './components/supabase-listener'
 import SupabaseProvider from './components/supabase-provider'
 import './globals.css'
 import { createServerClient } from './utils/supabase-server'
+import SignIn from './components/signIn'
 
 export const revalidate = 0
 
@@ -25,7 +26,7 @@ export default async function RootLayout ({ children }: { children: React.ReactN
       <body className='bg-primary'>
         <SupabaseProvider session={session}>
           <SupabaseListener serverAccessToken={session?.access_token} />
-          {children}
+          {session ? children : <SignIn />}
         </SupabaseProvider>
       </body>
     </html>
