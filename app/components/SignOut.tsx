@@ -8,7 +8,7 @@ import { EllipsisHorizontalIcon } from '@heroicons/react/24/solid'
 export default function SignOut () {
   const { supabase } = useSupabase()
 
-  function classNames (...classes) {
+  function classNames (...classes: string[]) {
     return classes.filter(Boolean).join(' ')
   }
 
