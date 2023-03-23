@@ -1,20 +1,23 @@
 'use client'
 
 import { useSupabase } from '@/app/components/supabase-provider'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { redirect } from 'next/navigation'
 
-export default async function CreateUserName () {
+export default function CreateUserName () {
   const [username, setUsername] = useState('')
   const { supabase, session } = useSupabase()
+  const router = useRouter()
 
-  if (session) {
-    const checkUsername = await supabase.from('users').select('username').eq('id', session?.user.id)
-    if (checkUsername) {
-      redirect('/home')
-    }
+  const checkUsername = async () => {
+    const checkUsername = await supabase.from('users').select('Username').eq('id', session?.user.id)
+    if (checkUsername.data![0].Username) router.push('/home')
+  }
+
+  if (!session) {
+    router.push('/')
   } else {
-    redirect('/signUp')
+    checkUsername()
   }
 
   const insertUsername = async () => {
