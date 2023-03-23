@@ -2,7 +2,7 @@ import { fetchMessages } from '@/app/utils/retrieveMessages'
 import { createServerClient } from '@/app/utils/supabase-server'
 import { redirect } from 'next/navigation'
 import InputMessage from '../../components/InputMessage'
-import SearchBar from '../../components/NewChat'
+import SearchBar from '../../components/NewConversations/NewChat'
 import SignOut from '../../components/SignOut'
 
 export default async function Home () {
@@ -16,6 +16,9 @@ export default async function Home () {
 
   if (!session) {
     redirect('/')
+  } else {
+    const checkUsername = await supabase.from('users').select('Username').eq('id', session?.user.id)
+    if (!checkUsername.data![0].Username) redirect('/signUp/username')
   }
 
   return (
