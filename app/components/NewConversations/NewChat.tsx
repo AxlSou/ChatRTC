@@ -3,17 +3,20 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, useState } from 'react'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
-import { useSupabase } from './supabase-provider'
+import { useSupabase } from '../supabase-provider'
+import UserItem from './UserItem'
+import ParticipantsList from './ParticipantsList'
 
-interface User {
+export interface User {
   id: string;
-  first_name: string | null;
+  Username: string | null;
 }
 
 export default function SearchBar () {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [userList, setUserList] = useState<User[]>()
+  const [participants, setParticipants] = useState<Array<User>>([])
   const { supabase } = useSupabase()
 
   const closeModal = () => setIsOpen(false)
@@ -23,8 +26,18 @@ export default function SearchBar () {
   // eslint-disable-next-line no-undef
   const onSearch = async (event: React.FormEvent) => {
     event.preventDefault()
-    const { data } = await supabase.from('users').select('id, first_name').ilike('first_name', '%' + query + '%')
-    if (data) setUserList(data)
+    if (query) {
+      const { data } = await supabase.from('users').select('id, Username').ilike('Username', '%' + query + '%')
+      if (data) setUserList(data)
+    }
+  }
+
+  const addParticipant = (user: User) => {
+    if (!participants.includes(user)) setParticipants(prev => [...prev, user])
+  }
+
+  const removeParticipant = (user: string) => {
+    setParticipants(prev => prev.filter(p => p.Username !== user))
   }
 
   return (
@@ -91,17 +104,21 @@ export default function SearchBar () {
                     <button
                       type='submit'
                       form='searchForm'
-                      className='inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
+                      className='mb-2 w-full inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
                     >
                       Search
                     </button>
                   </div>
+                  {participants.length > 0 && <ParticipantsList participants={participants} removeParticipant={removeParticipant} />}
+                  <div className='divider'>
+                    List of users:
+                  </div>
                   <div className='mt-4'>
-                    <ul className='flex items-center'>
+                    <ul className='items-center'>
                       {userList?.length === 0
                         ? 'User not found'
                         : userList?.map((user) => (
-                          <li className='w-full' key={user.first_name}>{user.first_name}</li>
+                          <UserItem key={user.Username} user={user} handleSelect={addParticipant} />
                         ))}
                     </ul>
                   </div>
