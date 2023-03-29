@@ -16,10 +16,14 @@ export default function SearchBar () {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [userList, setUserList] = useState<User[]>()
-  const [participants, setParticipants] = useState<Array<User>>([])
-  const { supabase } = useSupabase()
+  const [participants, setParticipants] = useState<User[]>([])
+  const { supabase, session } = useSupabase()
 
-  const closeModal = () => setIsOpen(false)
+  const closeModal = () => {
+    setIsOpen(false)
+    setUserList(undefined)
+    setParticipants([])
+  }
 
   const openModal = () => setIsOpen(true)
 
@@ -27,8 +31,8 @@ export default function SearchBar () {
   const onSearch = async (event: React.FormEvent) => {
     event.preventDefault()
     if (query) {
-      const { data } = await supabase.from('users').select('id, Username').ilike('Username', '%' + query + '%')
-      if (data) setUserList(data)
+      const { data } = await supabase.from('users').select('id, Username').ilike('Username', `%${query}%`)
+      if (data) setUserList(data.filter((user) => user.id !== session?.user.id))
     }
   }
 
@@ -38,6 +42,26 @@ export default function SearchBar () {
 
   const removeParticipant = (user: string) => {
     setParticipants(prev => prev.filter(p => p.Username !== user))
+  }
+
+  const createConversation = async () => {
+    try {
+      await supabase.from('Conversation').insert({}).select('id')
+        .then(async ({ data, error }) => {
+          if (data) {
+            const partiesToAdd = participants.map((p) => {
+              return { user_id: p.id, conversation_id: data[0].id, has_seen_latest_message: false }
+            })
+            if (session) partiesToAdd.push({ user_id: session?.user.id, conversation_id: data[0].id, has_seen_latest_message: true })
+            const { error } = await supabase.from('ConversationParticipant').insert(partiesToAdd)
+            if (error) console.error('insert conversation participants error:', error)
+          }
+          if (error) console.error('insert new conversation error:', error)
+        })
+      setIsOpen(false)
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   return (
@@ -109,10 +133,8 @@ export default function SearchBar () {
                       Search
                     </button>
                   </div>
-                  {participants.length > 0 && <ParticipantsList participants={participants} removeParticipant={removeParticipant} />}
-                  <div className='divider'>
-                    List of users:
-                  </div>
+                  {participants.length > 0 && <ParticipantsList participants={participants} removeParticipant={removeParticipant} createConversation={createConversation} />}
+                  {userList && <div className='divider'>List of users:</div>}
                   <div className='mt-4'>
                     <ul className='items-center'>
                       {userList?.length === 0
