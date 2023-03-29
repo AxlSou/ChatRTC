@@ -13,40 +13,40 @@ export interface Database {
       Conversation: {
         Row: {
           created_at: string | null
-          id: number
+          id: string
           last_message_id: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
-          id?: number
+          id?: string
           last_message_id?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
-          id?: number
+          id?: string
           last_message_id?: string | null
           updated_at?: string | null
         }
       }
       ConversationParticipant: {
         Row: {
-          conversation_id: number
+          conversation_id: string
           has_seen_latest_message: boolean
-          id: number
+          id: string
           user_id: string
         }
         Insert: {
-          conversation_id: number
+          conversation_id: string
           has_seen_latest_message?: boolean
-          id?: number
+          id?: string
           user_id: string
         }
         Update: {
-          conversation_id?: number
+          conversation_id?: string
           has_seen_latest_message?: boolean
-          id?: number
+          id?: string
           user_id?: string
         }
       }
