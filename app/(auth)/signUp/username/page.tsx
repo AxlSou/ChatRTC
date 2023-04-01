@@ -11,11 +11,11 @@ export default function CreateUserName () {
 
   const checkUsername = async () => {
     const checkUsername = await supabase.from('users').select('Username').eq('id', session?.user.id)
-    if (checkUsername.data![0].Username) router.push('/home')
+    if (checkUsername.data![0].Username) router.push('/')
   }
 
   if (!session) {
-    router.push('/')
+    router.push('/signIn')
   } else {
     checkUsername()
   }

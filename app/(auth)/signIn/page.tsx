@@ -12,7 +12,7 @@ export default function SignIn () {
   const router = useRouter()
 
   if (session) {
-    router.push('/home')
+    router.push('/')
   }
 
   const handleEmailLogin = async () => {

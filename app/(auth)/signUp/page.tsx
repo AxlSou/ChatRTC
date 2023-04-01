@@ -13,7 +13,7 @@ export default function SignUp () {
   const router = useRouter()
 
   if (session) {
-    router.push('/home')
+    router.push('/')
   }
 
   const handleSignUp = async () => {
