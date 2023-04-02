@@ -58,7 +58,7 @@ export default function SearchBar () {
           }
           if (error) console.error('insert new conversation error:', error)
         })
-      setIsOpen(false)
+      closeModal()
     } catch (e) {
       console.error(e)
     }
