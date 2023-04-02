@@ -3,12 +3,16 @@
 import { useState } from 'react'
 import { useSupabase } from './supabase-provider'
 
-export default function InputMessage () {
+interface Id {
+  conversationId: string
+}
+
+export default function InputMessage ({ conversationId }: Id) {
   const [text, setText] = useState('')
   const { supabase } = useSupabase()
 
   const handleSubmit = async () => {
-    const { error } = await supabase.from('messages').insert({ content: text })
+    const { error } = await supabase.from('messages').insert({ content: text, conversation_id: conversationId })
     if (error) {
       throw new Error(String(error))
     }
