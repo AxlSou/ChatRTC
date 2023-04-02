@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 export type Json =
   | string
   | number
@@ -53,21 +52,21 @@ export interface Database {
       messages: {
         Row: {
           content: string
-          conversation_id: number | null
+          conversation_id: string
           created_at: string | null
           id: string
           user_id: string
         }
         Insert: {
           content: string
-          conversation_id?: number | null
+          conversation_id: string
           created_at?: string | null
           id?: string
           user_id?: string
         }
         Update: {
           content?: string
-          conversation_id?: number | null
+          conversation_id?: string
           created_at?: string | null
           id?: string
           user_id?: string
