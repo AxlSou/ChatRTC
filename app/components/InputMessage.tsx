@@ -1,5 +1,6 @@
 'use client'
 
+import * as React from 'react'
 import { useState } from 'react'
 import { useSupabase } from './supabase-provider'
 
@@ -11,7 +12,10 @@ export default function InputMessage ({ conversationId }: Id) {
   const [text, setText] = useState('')
   const { supabase } = useSupabase()
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const form = e.currentTarget
+    form.reset()
     const { error } = await supabase.from('messages').insert({ content: text, conversation_id: conversationId })
     if (error) {
       throw new Error(String(error))
