@@ -37,7 +37,7 @@ export default async function RootLayout ({ children }: { children: React.ReactN
               <div className='bg-yellow-300 p-2 flex items-center'><SearchBar /></div>
               <div className='bg-purple-300 p-2'>
                 {/* @ts-expect-error Server Component */}
-                <ConversationsList sessionId={session?.user.id} />
+                <ConversationsList />
               </div>
             </div>
             <div className='bg-blue-300 col-start-2 row-span-1 grid grid-rows-[60px,_1fr]'>
