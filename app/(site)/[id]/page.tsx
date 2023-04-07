@@ -1,13 +1,21 @@
 import InputMessage from '../../components/InputMessage'
+import { createServerClient } from '@/app/utils/supabase-server'
+import { notFound } from 'next/navigation'
+import RealTimeMessages from './realTimeMessages'
 
-export const dynamic = 'force-static'
+export const revalidate = 0
 
-export default function Chat ({ params }: { params: { id: string } }) {
+export default async function Chat ({ params }: { params: { id: string } }) {
   const { id } = params
+  const supabase = createServerClient()
+  const { data: messages } = await supabase.from('messages').select('*').eq('conversation_id', id)
+
+  if (!messages) notFound()
+
   return (
-    <div className='h-full grid grid-rows-[_1fr,65px]'>
-      <div>
-        <h1>Working!!{id}</h1>
+    <div className='w-full h-full grid grid-rows-[_1fr,65px]'>
+      <div className='flex flex-col overflow-auto'>
+        <RealTimeMessages serverMessages={messages} />
       </div>
       <InputMessage conversationId={id} />
     </div>
