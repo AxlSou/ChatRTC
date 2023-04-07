@@ -6,11 +6,12 @@ export default async function retrieveConversations (sessionId: string | undefin
   // retrieving conversations where user is included
   const { data: chatIds } = await supabase
     .from('Conversation')
-    .select('id, users:ConversationParticipant!inner(user_id(Username))')
+    .select('id, users:ConversationParticipant!inner(user_id)')
     .eq('users.user_id', sessionId)
 
   return await supabase
     .from('Conversation')
-    .select('*, users:ConversationParticipant!inner(user_id:users(Username))')
+    .select('*, ConversationParticipant!inner(user_id(Username))')
     .in('id', [chatIds?.map(chat => chat.id)])
+    .filter('ConversationParticipant.user_id', 'neq', sessionId)
 }
