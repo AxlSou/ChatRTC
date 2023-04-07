@@ -76,22 +76,30 @@ export interface Database {
         Row: {
           email: string | null
           id: string
-          Username: string | null
+          Username: string
         }
         Insert: {
           email?: string | null
-          id: string
-          Username?: string | null
+          id?: string
+          Username?: string
         }
         Update: {
           email?: string | null
           id?: string
-          Username?: string | null
+          Username?: string
         }
       }
     }
     Views: {
-      [_ in never]: never
+      conversations_with_users: {
+        Row: {
+          id: string | null
+          last_message_id: string | null
+          updated_at: string | null
+          user_id: string | null
+          Username: string | null
+        }
+      }
     }
     Functions: {
       [_ in never]: never
