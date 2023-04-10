@@ -11,7 +11,7 @@ export default async function retrieveConversations (sessionId: string | undefin
 
   return await supabase
     .from('Conversation')
-    .select('*, ConversationParticipant!inner(user_id(Username))')
+    .select('id, updated_at, last_message_id(content), ConversationParticipant!inner(user_id(Username))')
     .in('id', [chatIds?.map(chat => chat.id)])
     .filter('ConversationParticipant.user_id', 'neq', sessionId)
 }
