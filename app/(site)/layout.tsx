@@ -8,6 +8,7 @@ import { createServerClient } from '../utils/supabase-server'
 import SearchBar from '../components/NewConversations/NewChat'
 import SignOut from '../components/SignOut'
 import ConversationsList from '../components/Conversations/ConversationsList'
+import retrieveConversations from '../utils/retrieveConversations'
 
 export const revalidate = 0
 
@@ -17,6 +18,18 @@ export default async function RootLayout ({ children }: { children: React.ReactN
   const {
     data: { session }
   } = await supabase.auth.getSession()
+
+  const { data } = await retrieveConversations(session?.user.id)
+
+  const chats = data?.map(item => {
+    return {
+      id: item.id,
+      lastMessage: item.last_message_id ? Object.values(item.last_message_id) : null,
+      updatedAt: item.updated_at,
+      participants: Object.values(item.ConversationParticipant!)
+        .map(item => item.user_id.Username)
+    }
+  })
 
   return (
     <html lang='en'>
@@ -35,12 +48,11 @@ export default async function RootLayout ({ children }: { children: React.ReactN
                 <SignOut />
               </header>
               <div className='bg-yellow-300 p-2 flex items-center'><SearchBar /></div>
-              <div className='bg-purple-300 p-2'>
-                {/* @ts-expect-error Server Component */}
-                <ConversationsList />
+              <div className='bg-purple-300'>
+                {chats && <ConversationsList serverList={chats} />}
               </div>
             </div>
-            <div className='bg-blue-300 col-start-2 row-span-1 grid grid-rows-[60px,_1fr]'>
+            <div className='col-start-2 row-span-1 grid grid-rows-[60px,_1fr]'>
               <header className='bg-red-300 p-2'>
                 <h1>Name</h1>
               </header>
