@@ -1,9 +1,8 @@
 import { createServerClient } from '@/app/utils/supabase-server'
 import { redirect } from 'next/navigation'
-import { fetchMessages } from '../utils/retrieveMessages'
+import retrieveConversations from '../utils/retrieveConversations'
 
 export default async function Main () {
-  const data = await fetchMessages()
   const supabase = createServerClient()
 
   const {
@@ -17,9 +16,11 @@ export default async function Main () {
     if (!checkUsername.data![0].Username) redirect('/signUp/username')
   }
 
+  const { data } = await retrieveConversations(session?.user.id)
+
   return (
     <main>
-      <pre>{data}</pre>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
     </main>
   )
 }

@@ -14,7 +14,7 @@ export default async function Chat ({ params }: { params: { id: string } }) {
 
   return (
     <div className='w-full h-full grid grid-rows-[_1fr,65px]'>
-      <div className='flex flex-col overflow-auto'>
+      <div className='bg-blue-300 flex flex-col overflow-y-auto'>
         <RealTimeMessages serverMessages={messages} />
       </div>
       <InputMessage conversationId={id} />
