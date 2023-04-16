@@ -4,10 +4,9 @@ import { useEffect, useState } from 'react'
 import { useSupabase } from '@/app/components/supabase-provider'
 import Link from 'next/link'
 
-interface ChatList {
+export interface ChatList {
   id: string;
   lastMessage: unknown[] | null;
-  updatedAt: string | null;
   participants: any[];
 }
 
@@ -16,26 +15,69 @@ export default function ConversationsList ({ serverList }: { serverList: ChatLis
   const [chatList, setChatList] = useState(serverList)
 
   useEffect(() => {
-    if (session?.user.id) {
-      const channel = supabase
-        .channel('realtime chat list')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'Conversation'
-          },
-          (payload) => {
-            console.log(payload)
-            // setChatList([...chatList, payload.new as ChatList])
-          }
-        )
-        .subscribe()
+    const channel = supabase
+      .channel('realtime chat list')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'ConversationParticipant',
+          filter: `user_id=eq.${session?.user.id}`
+        },
+        async (payload) => {
+          const { data: chats } = await supabase
+            .from('Conversation')
+            .select('id, last_message_id(content), ConversationParticipant!inner(user_id(Username))')
+            .eq('id', payload.new.conversation_id)
+            .filter('ConversationParticipant.user_id', 'neq', session?.user.id)
 
-      return () => {
-        supabase.removeChannel(channel)
-      }
+          const chatListItem = chats?.map(item => {
+            return {
+              id: item.id,
+              lastMessage: item.last_message_id ? Object.values(item.last_message_id) : null,
+              participants: Object.values(item.ConversationParticipant!)
+                .map(item => item.user_id.Username)
+            }
+          })
+          if (chatListItem) setChatList([...chatList, chatListItem[0] as ChatList])
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, chatList, setChatList])
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('realtime conversation item')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'Conversation',
+          filter: `id=in.${[chatList.map(chat => chat.id)]}`
+        },
+        async (payload) => {
+          console.log(payload)
+          const { data: chats, error } = await supabase
+            .from('Conversation')
+            .select('id, last_message_id(content, created_at), ConversationParticipant!inner(user_id(Username))')
+            .eq('id', payload.new.conversation_id)
+            .filter('ConversationParticipant.user_id', 'neq', session?.user.id)
+
+          console.log(chats)
+          console.log(error)
+          // if (chatListItem) setChatList([...chatList, chatListItem[0] as ChatList])
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
     }
   }, [supabase, chatList, setChatList])
 
@@ -66,7 +108,7 @@ export default function ConversationsList ({ serverList }: { serverList: ChatLis
                 </div>
                 <div className='flex justify-between'>
                   <span>{item.lastMessage && item.lastMessage.join('')}</span>
-                  <span>{item.lastMessage && item.updatedAt?.slice(11, 16)}</span>
+                  <span>{item.lastMessage && '01:01'}</span>
                 </div>
               </div>
             </Link>
