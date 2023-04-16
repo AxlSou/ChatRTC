@@ -19,17 +19,7 @@ export default async function RootLayout ({ children }: { children: React.ReactN
     data: { session }
   } = await supabase.auth.getSession()
 
-  const { data } = await retrieveConversations(session?.user.id)
-
-  const chats = data?.map(item => {
-    return {
-      id: item.id,
-      lastMessage: item.last_message_id ? Object.values(item.last_message_id) : null,
-      updatedAt: item.updated_at,
-      participants: Object.values(item.ConversationParticipant!)
-        .map(item => item.user_id.Username)
-    }
-  })
+  const chats = await retrieveConversations(session?.user.id)
 
   return (
     <html lang='en'>
