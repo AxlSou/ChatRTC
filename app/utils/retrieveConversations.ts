@@ -9,9 +9,18 @@ export default async function retrieveConversations (sessionId: string | undefin
     .select('id, users:ConversationParticipant!inner(user_id)')
     .eq('users.user_id', sessionId)
 
-  return await supabase
+  const { data: chats } = await supabase
     .from('Conversation')
-    .select('id, updated_at, last_message_id(content), ConversationParticipant!inner(user_id(Username))')
+    .select('id, last_message_id(content), ConversationParticipant!inner(user_id(Username))')
     .in('id', [chatIds?.map(chat => chat.id)])
     .filter('ConversationParticipant.user_id', 'neq', sessionId)
+
+  return chats?.map(item => {
+    return {
+      id: item.id,
+      lastMessage: item.last_message_id ? Object.values(item.last_message_id) : null,
+      participants: Object.values(item.ConversationParticipant!)
+        .map(item => item.user_id.Username)
+    }
+  })
 }
